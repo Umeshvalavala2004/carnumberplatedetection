@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plate Recognizer - Accurate ALPR Software</title>
+    <meta name="description" content="Accurate, fast Automatic License Plate Recognition (ALPR) software. Works in dark, blurry images. Includes Vehicle Make, Model, Color.">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600|Roboto:400">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #343638;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            color: #343638;
+        }
+        a {
+            color: #006AFF;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: #ffffff;
+            padding: 15px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header .logo img {
+            height: 24px;
+        }
+        .header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+        }
+        .header nav ul li a {
+            color: #031B4F;
+            font-weight: 500;
+        }
+        .header nav ul li a:hover {
+            color: #006AFF;
+        }
+        .hero {
+            background: url('https://platerecognizer.com/wp-content/uploads/2020/07/top-bg.jpg') no-repeat center center/cover;
+            padding: 100px 0;
+            color: #ffffff;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 46px;
+            margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        .btn {
+            background: #006AFF;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            text-transform: uppercase;
+            display: inline-block;
+            margin: 10px;
+        }
+        .btn:hover {
+            background: #031B4F;
+        }
+        .features {
+            background: #ffffff;
+            padding: 50px 0;
+        }
+        .features h2 {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .feature-item {
+            text-align: center;
+            padding: 20px;
+            background: #F3F5F9;
+            border-radius: 10px;
+        }
+        .feature-item h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .feature-item p {
+            font-size: 16px;
+            color: #77797D;
+        }
+        .demo {
+            background: #F3F5F9;
+            padding: 50px 0;
+            text-align: center;
+        }
+        .demo h2 {
+            margin-bottom: 20px;
+        }
+        .demo iframe {
+            border: none;
+            margin-top: 20px;
+        }
+        .footer {
+            background: #031B4F;
+            color: #ffffff;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .footer a {
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <a href="https://platerecognizer.com">
+                    <img src="https://platerecognizer.com/wp-content/uploads/2020/07/Plate-Recognizer-ALPR-license-plate-recognition-logo.png" alt="Plate Recognizer Logo">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#integrations">Integrations</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#help">Help</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Accurate, Fast, Developer-Friendly ALPR</h1>
+            <p>Automatic License Plate Recognition software that works in all environments, optimized for your location.</p>
+            <a href="https://app.platerecognizer.com/accounts/signup/" class="btn">Get Started</a>
+            <a href="#demo" class="btn">Watch Video</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2>Why Choose Plate Recognizer?</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h3>Works in Tough Conditions</h3>
+                    <p>Handles blurry, dark, and angled images with ease.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Feature-Rich</h3>
+                    <p>Get vehicle make, model, color, and more.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Global Support</h3>
+                    <p>Supports over 90 countries with region-specific optimizations.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo">
+        <div class="container">
+            <h2>Try It Out</h2>
+            <p>Upload an image (up to 3MB) and we’ll decode the license plate.</p>
+            <iframe src="https://app.platerecognizer.com/alpr-demo" width="150px" height="38px" frameborder="0"></iframe>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Plate Recognizer. All rights reserved.</p>
+            <p><a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms of Service</a></p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -95,7 +95,7 @@ def index():
                                    processed_image=processed_filename, 
                                    cropped_image=cropped_filename)
 
-    return render_template("index.html")  # ❌ Fixed the syntax error
+    return render_template("ui.html")  # ❌ Fixed the syntax error
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

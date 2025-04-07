@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Plate Detection</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            color: #192A56;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .upload-section {
+            margin-bottom: 20px;
+        }
+
+        .upload-section input {
+            display: none;
+        }
+
+        .upload-section label {
+            background-color: #74B9FF;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .upload-section label:hover {
+            background-color: #45a049;
+        }
+
+        .result-section {
+            margin-top: 20px;
+        }
+
+        .result-section img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .result-section p {
+            font-size: 18px;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        .loading {
+            display: none;
+            font-size: 18px;
+            color: #192A56;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Number Plate Detection</h1>
+    <div class="container">
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <input type="file" id="file-input" accept="image/*, video/*">
+            <label for="file-input">Upload Image/Video</label>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section">
+            <img id="preview" src="#" alt="Preview" style="display: none;">
+            <p id="result-text"></p>
+            <div class="loading" id="loading">Processing...</div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const fileInput = document.getElementById('file-input');
+        const preview = document.getElementById('preview');
+        const resultText = document.getElementById('result-text');
+        const loading = document.getElementById('loading');
+
+        // Handle File Upload
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                // Display Preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+
+                // Process the File
+                processFile(file);
+            }
+        });
+
+        // Process the File (Call API)
+        async function processFile(file) {
+            loading.style.display = 'block';
+            resultText.textContent = '';
+
+            // Replace with your Plate Recognizer API Key
+            const apiKey = 'YOUR_PLATE_RECOGNIZER_API_KEY';
+            const apiUrl = 'https://api.platerecognizer.com/v1/plate-reader/';
+
+            const formData = new FormData();
+            formData.append('upload', file);
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Token ${apiKey}`
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+                console.log(data);
+
+                if (data.results && data.results.length > 0) {
+                    const plate = data.results[0].plate;
+                    resultText.textContent = `Detected License Plate: ${plate}`;
+                } else {
+                    resultText.textContent = 'No license plate detected.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultText.textContent = 'An error occurred. Please try again.';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

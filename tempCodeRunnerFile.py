@@ -1,76 +1,101 @@
+from flask import Flask, render_template, request, redirect, url_for
+import os
 import numpy as np
 import cv2
 import imutils
 import pytesseract
-import os
+import uuid  # Unique filenames
 
-# Configure Tesseract path
+# Initialize Flask app
+app = Flask(__name__)
+
+# Configure directories
+UPLOAD_FOLDER = 'static/uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Configure Tesseract OCR (Ensure correct path for Windows users)
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
-# Read the image file
-image_path = 'Car Images/3.jpg'
-if not os.path.exists(image_path):
-    print(f"Error: Image file '{image_path}' not found.")
-    exit()
+def process_image(image_path, filename):
+    """Processes an image to detect a number plate and extract text."""
+    image = cv2.imread(image_path)
 
-image = cv2.imread(image_path)
+    if image is None:
+        return None, None, "Error: Unable to read image."
 
-# Resize the image - change width to 500
-image = imutils.resize(image, width=500)
+    # Resize for consistency
+    image = imutils.resize(image, width=500)
 
-# Convert to grayscale
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Convert to grayscale and apply bilateral filter
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.bilateralFilter(gray, 11, 17, 17)
 
-# Apply bilateral filter (Noise removal while preserving edges)
-gray = cv2.bilateralFilter(gray, 11, 17, 17)
+    # Edge detection
+    edged = cv2.Canny(gray, 170, 200)
 
-# Apply Canny edge detection
-edged = cv2.Canny(gray, 170, 200)
+    # Find contours
+    contours, _ = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)[:30]
 
-# Find contours
-contours, _ = cv2.findContours(edged.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    number_plate_cnt = None
+    cropped_filename = None
+    extracted_text = "Number plate not detected."
 
-# Sort contours by area, keeping only the largest ones
-contours = sorted(contours, key=cv2.contourArea, reverse=True)[:30]
-NumberPlateCnt = None
+    for c in contours:
+        peri = cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, 0.02 * peri, True)
 
-# Loop over contours to find the number plate
-for c in contours:
-    peri = cv2.arcLength(c, True)
-    approx = cv2.approxPolyDP(c, 0.02 * peri, True)
+        if len(approx) == 4:  # Looking for a quadrilateral shape
+            number_plate_cnt = approx
+            x, y, w, h = cv2.boundingRect(c)
+            cropped_img = gray[y:y + h, x:x + w]
 
-    if len(approx) == 4:  # Select the contour with 4 corners
-        NumberPlateCnt = approx
-        x, y, w, h = cv2.boundingRect(c)
+            # Save the detected plate with a unique name
+            cropped_filename = f"plate_{uuid.uuid4().hex}.png"
+            cropped_path = os.path.join(app.config['UPLOAD_FOLDER'], cropped_filename)
+            cv2.imwrite(cropped_path, cropped_img)
 
-        # Crop and save the number plate
-        cropped_image = gray[y:y + h, x:x + w]
-        cropped_path = 'Cropped Images-Text/7.png'
-        os.makedirs(os.path.dirname(cropped_path), exist_ok=True)
-        cv2.imwrite(cropped_path, cropped_image)
+            # Run OCR
+            _, thresh = cv2.threshold(cropped_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            extracted_text = pytesseract.image_to_string(thresh, lang='eng').strip()
 
-        break  # Exit after finding the first valid plate
+            break  # Stop after finding the first valid plate
 
-# Draw the detected number plate contour
-if NumberPlateCnt is not None:
-    cv2.drawContours(image, [NumberPlateCnt], -1, (0, 255, 0), 3)
-    cv2.imshow("Number Plate Detected", image)
-else:
-    print("No number plate detected.")
+    # Save processed image with detected plate
+    processed_filename = f"processed_{filename}"
+    processed_path = os.path.join(app.config['UPLOAD_FOLDER'], processed_filename)
 
-# Read and process the cropped number plate image
-if os.path.exists(cropped_path):
-    cropped_img = cv2.imread(cropped_path, cv2.IMREAD_GRAYSCALE)
+    if number_plate_cnt is not None:
+        cv2.drawContours(image, [number_plate_cnt], -1, (0, 255, 0), 3)
+        cv2.imwrite(processed_path, image)
 
-    # Apply thresholding for better OCR results
-    _, thresh = cv2.threshold(cropped_img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return processed_filename, cropped_filename, extracted_text
 
-    # Run Tesseract OCR
-    text = pytesseract.image_to_string(thresh, lang='eng')
-    print("Detected Number Plate:", text.strip())
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        if "file" not in request.files:
+            return redirect(request.url)
 
-    # Show cropped image
-    cv2.imshow("Cropped Number Plate", thresh)
+        file = request.files["file"]
+        if file.filename == "":
+            return redirect(request.url)
 
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+        if file and file.filename.lower().endswith(('png', 'jpg', 'jpeg')):
+            unique_filename = f"{uuid.uuid4().hex}_{file.filename}"
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            file.save(file_path)
+
+            processed_filename, cropped_filename, extracted_text = process_image(file_path, unique_filename)
+
+            return render_template("result.html", 
+                                   result=extracted_text, 
+                                   uploaded_image=unique_filename, 
+                                   processed_image=processed_filename, 
+                                   cropped_image=cropped_filename)
+
+    return render_template("index.html")  # ❌ Fixed the syntax error
+
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
